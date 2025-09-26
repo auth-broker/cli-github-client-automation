@@ -1,9 +1,11 @@
+from __future__ import annotations
+
 import json
 import urllib.request
 from typing import Any
 from urllib.parse import urlparse, urlunparse
 
-API_BASE = "https://api.github.com"
+from .constants import API_BASE, GITHUB_API_ACCEPT, HTTP_TIMEOUT_SEC, USER_AGENT
 
 
 def inject_token_into_https(clone_url: str, token: str) -> str:
@@ -15,10 +17,11 @@ def inject_token_into_https(clone_url: str, token: str) -> str:
 
 def gh_get(url: str, token: str | None = None) -> Any:
     req = urllib.request.Request(url)
-    req.add_header("Accept", "application/vnd.github+json")
+    req.add_header("Accept", GITHUB_API_ACCEPT)
+    req.add_header("User-Agent", USER_AGENT)
     if token:
         req.add_header("Authorization", f"Bearer {token}")
-    with urllib.request.urlopen(req) as resp:
+    with urllib.request.urlopen(req, timeout=HTTP_TIMEOUT_SEC) as resp:
         return json.loads(resp.read().decode("utf-8"))
 
 

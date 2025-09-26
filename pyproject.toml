@@ -18,6 +18,8 @@ description = "Clone/update/commit/push across an org's GitHub repos"
 readme = "README.md"
 requires-python = ">=3.13"
 dependencies = [
+    "pydantic>=2.11.9",
+    "pydantic-settings>=2.11.0",
     "python-dotenv>=1.1.1",
     "typer>=0.19.2",
 ]

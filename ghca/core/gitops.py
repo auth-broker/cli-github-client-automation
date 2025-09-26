@@ -1,6 +1,9 @@
+from __future__ import annotations
+
 import os
 import subprocess
 import sys
+from urllib.parse import urlparse
 
 from .api import inject_token_into_https
 
@@ -49,7 +52,7 @@ def find_git_worktrees(dest: str) -> list[str]:
     return sorted(d for d in worktrees if not d.endswith(".git"))
 
 
-def pull_update(dest: str, mirror=False):
+def pull_update(dest: str, mirror=False) -> tuple[int, int]:
     git_dirs: list[str] = []
     if mirror:
         for root, dirs, files in os.walk(dest):
@@ -83,81 +86,53 @@ def get_origin_url(repo_dir: str) -> str | None:
     return out.strip() if ok else None
 
 
-def batch_commit_and_push(
-    dest: str,
+def commit_and_push_one(
+    repo_dir: str,
     message: str,
-    branch: str | None = None,
-    allow_empty: bool = False,
-    sign: bool = False,
-    token: str | None = None,
-    push_no_verify: bool = False,
-):
-    repos = find_git_worktrees(dest)
-    if not repos:
-        print("No repositories found to commit/push.")
-        return
+    branch: str | None,
+    allow_empty: bool,
+    sign: bool,
+    token: str | None,
+    push_no_verify: bool,
+) -> tuple[bool, str]:
+    name = os.path.basename(repo_dir.rstrip(os.sep))
+    if not os.path.isdir(os.path.join(repo_dir, ".git")):
+        return False, f"[skip] {name}: not a git worktree"
 
-    print(f"Batch committing to {len(repos)} repositories...")
-    committed = pushed = skipped_clean = failed = 0
+    ok, err = run(["git", "add", "-A"], cwd=repo_dir)
+    if not ok:
+        return False, f"[fail] {name}: git add failed: {err}"
 
-    for d in repos:
-        name = os.path.basename(d.rstrip(os.sep))
-        if not os.path.isdir(os.path.join(d, ".git")):
-            print(f"[skip] {name}: not a git worktree")
-            continue
+    if not git_status_has_changes(repo_dir) and not allow_empty:
+        return True, f"[clean] {name}: no changes"  # treat as success
 
-        ok, err = run(["git", "add", "-A"], cwd=d)
-        if not ok:
-            print(f"[fail] {name}: git add failed: {err}", file=sys.stderr)
-            failed += 1
-            continue
+    commit_cmd = ["git", "commit", "-m", message]
+    if allow_empty:
+        commit_cmd.append("--allow-empty")
+    if sign:
+        commit_cmd.append("-S")
+    ok, err = run(commit_cmd, cwd=repo_dir)
+    if not ok and (not err or "nothing to commit" not in err.lower()):
+        return False, f"[fail] {name}: git commit failed: {err}"
 
-        if not git_status_has_changes(d) and not allow_empty:
-            print(f"[clean] {name}: no changes")
-            skipped_clean += 1
-            continue
+    target_branch = branch or get_current_branch(repo_dir) or "main"
+    origin_url = get_origin_url(repo_dir)
 
-        commit_cmd = ["git", "commit", "-m", message]
-        if allow_empty:
-            commit_cmd.append("--allow-empty")
-        if sign:
-            commit_cmd.append("-S")
-        ok, err = run(commit_cmd, cwd=d)
-        if not ok:
-            if err and "nothing to commit" in err.lower():
-                print(f"[clean] {name}: nothing to commit")
-                skipped_clean += 1
-                continue
-            print(f"[fail] {name}: git commit failed: {err}", file=sys.stderr)
-            failed += 1
-            continue
-        committed += 1
+    push_cmd = ["git", "push"]
+    if push_no_verify:
+        push_cmd.append("--no-verify")
 
-        target_branch = branch or get_current_branch(d) or "main"
-        origin_url = get_origin_url(d)
+    push_url = None
+    if origin_url and origin_url.startswith("https://") and token:
+        if "@" not in urlparse(origin_url).netloc:
+            push_url = inject_token_into_https(origin_url, token)
 
-        push_cmd = ["git", "push"]
-        if push_no_verify:
-            push_cmd.append("--no-verify")
+    if push_url:
+        push_cmd += [push_url, f"HEAD:{target_branch}"]
+    else:
+        push_cmd += ["-u", "origin", target_branch]
 
-        push_url = None
-        if origin_url and origin_url.startswith("https://") and token:
-            from urllib.parse import urlparse
-
-            if "@" not in urlparse(origin_url).netloc:
-                push_url = inject_token_into_https(origin_url, token)
-
-        if push_url:
-            push_cmd += [push_url, f"HEAD:{target_branch}"]
-        else:
-            push_cmd += ["-u", "origin", target_branch]
-
-        ok, err = run(push_cmd, cwd=d)
-        if ok:
-            print(f"[pushed] {name} -> {target_branch}")
-            pushed += 1
-        else:
-            print(f"[fail] {name}: git push failed: {err}", file=sys.stderr)
-            failed += 1
-
-    print(f"Done. committed={committed}, pushed={pushed}, clean={skipped_clean}, failed={failed}.")
+    ok, err = run(push_cmd, cwd=repo_dir)
+    if ok:
+        return True, f"[pushed] {name} -> {target_branch}"
+    return False, f"[fail] {name}: git push failed: {err}"
