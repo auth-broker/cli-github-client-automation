@@ -18,7 +18,7 @@ def clone(
     mirror: bool = typer.Option(False, "--mirror", help="Use --mirror clones"),
     shallow: bool = typer.Option(False, "--shallow", help="Shallow clones (depth 1)"),
     include_archived: bool = typer.Option(False, "--include-archived", help="Include archived repos"),
-    visibility: Visibility = typer.Option(Visibility.all, case_sensitive=False),
+    visibility: Visibility = typer.Option(Visibility.all, case_sensitive=False),  # noqa: B008
 ):
     """Typer command to clone all repositories for an organisation."""
     s = get_settings()

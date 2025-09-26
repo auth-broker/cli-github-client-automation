@@ -60,7 +60,7 @@ def pull_update(dest: str, mirror=False) -> tuple[int, int]:
     """Fetch updates for repositories under dest; returns (succeeded, total)."""
     git_dirs: list[str] = []
     if mirror:
-        for root, dirs, files in os.walk(dest):
+        for root, dirs, _files in os.walk(dest):
             if root.endswith(".git") and os.path.isfile(os.path.join(root, "config")):
                 git_dirs.append(root)
                 dirs[:] = []
