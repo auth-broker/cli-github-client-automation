@@ -1,5 +1,3 @@
-from __future__ import annotations
-
 """Module holding constants used across ghca."""
 
 API_BASE = "https://api.github.com"

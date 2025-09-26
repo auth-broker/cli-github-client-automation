@@ -1,5 +1,3 @@
-from __future__ import annotations
-
 """Services for batch commit and push operations."""
 
 from ...core.gitops import commit_and_push_one, find_git_worktrees

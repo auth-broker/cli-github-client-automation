@@ -1,5 +1,3 @@
-from __future__ import annotations
-
 """Services for the clone command."""
 
 import os

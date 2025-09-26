@@ -1,5 +1,3 @@
-from __future__ import annotations
-
 """Small helpers for running Git commands and performing repo operations."""
 
 import os

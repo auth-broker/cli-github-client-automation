@@ -1,5 +1,3 @@
-from __future__ import annotations
-
 """Service helpers for updating repository clones."""
 
 import os

@@ -1,12 +1,9 @@
-from __future__ import annotations
-
 """CLI for updating existing local repository clones."""
 
 import typer
 
 from ...config.settings import get_settings
 from .service import update_repos
-
 
 app = typer.Typer(add_completion=False)
 

@@ -1,5 +1,3 @@
-from __future__ import annotations
-
 """CLI for cloning repositories from an organisation."""
 
 import typer
@@ -7,7 +5,6 @@ import typer
 from ...config.settings import get_settings
 from ...core.types import Visibility
 from .service import clone_org
-
 
 app = typer.Typer(add_completion=False)
 

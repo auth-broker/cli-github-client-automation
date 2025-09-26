@@ -1,5 +1,3 @@
-from __future__ import annotations
-
 """Configuration helpers for loading environment-backed settings."""
 
 import os

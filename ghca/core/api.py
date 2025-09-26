@@ -1,5 +1,3 @@
-from __future__ import annotations
-
 """GitHub API helpers used by ghca commands."""
 
 import json
