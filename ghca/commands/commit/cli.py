@@ -1,9 +1,12 @@
 from __future__ import annotations
 
+"""CLI for batch committing and pushing changes across repositories."""
+
 import typer
 
 from ...config.settings import get_settings
 from .service import batch_commit_and_push
+
 
 app = typer.Typer(add_completion=False)
 
@@ -18,6 +21,7 @@ def commit(
     sign: bool = typer.Option(False, "--sign", help="GPG-sign commits if configured"),
     no_verify: bool = typer.Option(False, "--no-verify", help="Skip push hooks"),
 ):
+    """Typer command to run batch commit & push across repositories."""
     s = get_settings()
     _dest = dest or s.default_dest
     _token = token if token is not None else s.github_token

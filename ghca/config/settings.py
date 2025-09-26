@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+"""Configuration helpers for loading environment-backed settings."""
+
 import os
 
 from dotenv import load_dotenv
@@ -20,5 +22,6 @@ class Settings(BaseSettings):
 
 
 def get_settings() -> Settings:
+    """Return a Settings instance (constructed each call)."""
     # simple singleton pattern if you want; for now just construct
     return Settings()

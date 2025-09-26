@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+"""Module holding constants used across ghca."""
+
 API_BASE = "https://api.github.com"
 GITHUB_API_ACCEPT = "application/vnd.github+json"
 USER_AGENT = "ghca/0.2 (+https://github.com/auth-broker)"  # customise if you like

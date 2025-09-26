@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+"""GitHub API helpers used by ghca commands."""
+
 import json
 import urllib.request
 from typing import Any
@@ -9,13 +11,14 @@ from .constants import API_BASE, GITHUB_API_ACCEPT, HTTP_TIMEOUT_SEC, USER_AGENT
 
 
 def inject_token_into_https(clone_url: str, token: str) -> str:
-    """https://github.com/owner/repo.git -> https://x-access-token:<token>@github.com/owner/repo.git"""
+    """Inject a token into an HTTPS clone URL for authenticated pushes."""
     u = urlparse(clone_url)
     netloc = f"x-access-token:{token}@{u.netloc}"
     return urlunparse((u.scheme, netloc, u.path, u.params, u.query, u.fragment))
 
 
 def gh_get(url: str, token: str | None = None) -> Any:
+    """Perform a GitHub API GET request and return decoded JSON."""
     req = urllib.request.Request(url)
     req.add_header("Accept", GITHUB_API_ACCEPT)
     req.add_header("User-Agent", USER_AGENT)
@@ -31,6 +34,7 @@ def list_org_repos(
     include_archived: bool = False,
     visibility: str = "all",
 ) -> list[dict[str, Any]]:
+    """List repositories for an organisation, optionally filtering archived and visibility."""
     repos: list[dict[str, Any]] = []
     page, per_page = 1, 100
     while True:

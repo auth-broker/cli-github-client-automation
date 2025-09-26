@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+"""Services for the clone command."""
+
 import os
 import sys
 import time
@@ -18,6 +20,7 @@ def clone_org(
     include_archived: bool,
     visibility: str,
 ) -> None:
+    """Clone all repositories for an org into the destination directory."""
     os.makedirs(dest, exist_ok=True)
     repos = list_org_repos(org, token=token, include_archived=include_archived, visibility=visibility)
     if not repos:

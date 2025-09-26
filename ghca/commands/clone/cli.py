@@ -1,10 +1,13 @@
 from __future__ import annotations
 
+"""CLI for cloning repositories from an organisation."""
+
 import typer
 
 from ...config.settings import get_settings
 from ...core.types import Visibility
 from .service import clone_org
+
 
 app = typer.Typer(add_completion=False)
 
@@ -20,6 +23,7 @@ def clone(
     include_archived: bool = typer.Option(False, "--include-archived", help="Include archived repos"),
     visibility: Visibility = typer.Option(Visibility.all, case_sensitive=False),
 ):
+    """Typer command to clone all repositories for an organisation."""
     s = get_settings()
     _dest = dest or s.default_dest
     _token = token if token is not None else s.github_token

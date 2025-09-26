@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+"""Small helpers for running Git commands and performing repo operations."""
+
 import os
 import subprocess
 import sys
@@ -9,6 +11,7 @@ from .api import inject_token_into_https
 
 
 def run(cmd: list[str], cwd: str | None = None) -> tuple[bool, str | None]:
+    """Run a command, returning (success, error_message)."""
     try:
         subprocess.check_call(cmd, cwd=cwd)
         return True, None
@@ -17,6 +20,7 @@ def run(cmd: list[str], cwd: str | None = None) -> tuple[bool, str | None]:
 
 
 def run_out(cmd: list[str], cwd: str | None = None) -> tuple[bool, str]:
+    """Run a command and return (success, stdout_output)."""
     try:
         out = subprocess.check_output(cmd, cwd=cwd, stderr=subprocess.STDOUT)
         return True, out.decode("utf-8").strip()
@@ -25,6 +29,7 @@ def run_out(cmd: list[str], cwd: str | None = None) -> tuple[bool, str]:
 
 
 def clone_repo(repo: dict, dest: str, use_ssh=False, mirror=False, shallow=False, token: str | None = None):
+    """Clone a repository to the destination path with optional auth/mode flags."""
     name = repo["name"]
     url = repo["ssh_url"] if use_ssh else repo["clone_url"]
     if (not use_ssh) and token:
@@ -44,6 +49,7 @@ def clone_repo(repo: dict, dest: str, use_ssh=False, mirror=False, shallow=False
 
 
 def find_git_worktrees(dest: str) -> list[str]:
+    """Discover non-bare git worktree directories under dest."""
     worktrees = set()
     for root, dirs, _ in os.walk(dest):
         if ".git" in dirs:
@@ -53,6 +59,7 @@ def find_git_worktrees(dest: str) -> list[str]:
 
 
 def pull_update(dest: str, mirror=False) -> tuple[int, int]:
+    """Fetch updates for repositories under dest; returns (succeeded, total)."""
     git_dirs: list[str] = []
     if mirror:
         for root, dirs, files in os.walk(dest):
@@ -72,16 +79,19 @@ def pull_update(dest: str, mirror=False) -> tuple[int, int]:
 
 
 def git_status_has_changes(repo_dir: str) -> bool:
+    """Return True if `git status --porcelain` shows changes in repo_dir."""
     success, out = run_out(["git", "status", "--porcelain"], cwd=repo_dir)
     return bool(success and out.strip())
 
 
 def get_current_branch(repo_dir: str) -> str | None:
+    """Get the current branch name for the repository at repo_dir."""
     ok, out = run_out(["git", "rev-parse", "--abbrev-ref", "HEAD"], cwd=repo_dir)
     return out.strip() if ok else None
 
 
 def get_origin_url(repo_dir: str) -> str | None:
+    """Get the origin remote URL for the repository at repo_dir."""
     ok, out = run_out(["git", "remote", "get-url", "origin"], cwd=repo_dir)
     return out.strip() if ok else None
 
@@ -95,6 +105,7 @@ def commit_and_push_one(
     token: str | None,
     push_no_verify: bool,
 ) -> tuple[bool, str]:
+    """Commit changes in a repo and push to origin, handling auth and flags."""
     name = os.path.basename(repo_dir.rstrip(os.sep))
     if not os.path.isdir(os.path.join(repo_dir, ".git")):
         return False, f"[skip] {name}: not a git worktree"
