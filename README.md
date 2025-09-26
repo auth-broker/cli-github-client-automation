@@ -1,47 +1,67 @@
-# Clone all org repositories
+# ghca — quick commands
 
-Tooling to clone every repository from the **auth-broker** GitHub organisation.
+**Each item = what it does + copy-paste example.**
 
-## Prerequisites
-
-* Git
-* Python 3.10+
-* `uv` (for virtual env + deps): `pipx install uv` or `pip install uv`
-* A GitHub **PAT** with org access (Contents: Read) — put it in `.env`
-
-## Setup
-
-1. Create `.env` in the project root:
-
-```
-GITHUB_TOKEN=ghp_your_token_here
-```
-
-2. Install deps (creates `.venv` automatically):
+## clone — clone all org repos into a folder
 
 ```bash
-make sync
+uv run ghca clone --org auth-broker --dest ../ --visibility private --ssh
 ```
 
-## Usage
-
-Clone all private repos from **auth-broker** into the parent folder (`../`):
+## update — fetch/prune all repos in a folder
 
 ```bash
-make clone
+uv run ghca update --dest ../
 ```
 
-Update (fetch/prune) existing clones:
+## commit — batch commit & push across repos
 
 ```bash
-make update
+uv run ghca commit "chore: bump versions" --dest ../ --branch main
 ```
 
-## Notes
+## release (auto) — per-repo `uv version` → tag `v<version>`, title `<version>`, generated notes, published
 
-* The Makefile defaults to:
+```bash
+uv run ghca release --auto-from-uv --dest ../
+```
 
-  * `ORG=auth-broker`
-  * `DEST=../`
-  * `--visibility private --ssh` (SSH cloning). Ensure your GitHub SSH key is configured.
-    If you don’t use SSH, switch the default in the Makefile to HTTPS (PAT used from `.env`).
+## release (fixed) — create a specific tag across repos (with generated notes)
+
+```bash
+uv run ghca release --tag v0.3.0 --generate-notes --dest ../
+```
+
+## batch — run any command across folders
+
+**Portable (recommended):**
+
+```bash
+uv run ghca batch --dest ../ -- uv version --bump patch
+```
+
+**Via shell (quoted string):**
+
+```bash
+uv run ghca batch --shell --dest ../ "uv version --bump patch"
+```
+
+## discard — discard local changes across repos
+
+**Hard reset whole repo:**
+
+```bash
+uv run ghca discard --dest ../
+```
+
+**Specific paths only:**
+
+```bash
+uv run ghca discard --dest ../ --path package.json
+```
+
+**Also remove untracked/ignored files:**
+
+```bash
+uv run ghca discard --dest ../ --clean --clean-ignored
+```
