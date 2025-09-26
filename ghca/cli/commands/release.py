@@ -13,19 +13,25 @@ app = typer.Typer(add_completion=False)
 @app.command()
 def release(
     # Fixed-tag mode (optional if using auto)
-    tag: str | None = typer.Option(None, "--tag", "-t", help="Release tag to create (e.g. v0.3.0). Omit if using --auto-from-uv."),
-    title: str | None = typer.Option(None, "--title", help="Release title (defaults to version in auto mode, else tag)"),
+    tag: str | None = typer.Option(
+        None, "--tag", "-t", help="Release tag to create (e.g. v0.3.0). Omit if using --auto-from-uv."
+    ),
+    title: str | None = typer.Option(
+        None, "--title", help="Release title (defaults to version in auto mode, else tag)"
+    ),
     notes_file: str | None = typer.Option(None, "--notes-file", help="Path to release notes file"),
     generate_notes: bool = typer.Option(False, "--generate-notes", help="Use GitHub-generated notes (fixed-tag mode)"),
     draft: bool = typer.Option(False, "--draft", help="Create as draft (fixed-tag mode)"),
     prerelease: bool = typer.Option(False, "--prerelease", help="Mark as prerelease (fixed-tag mode)"),
     target: str | None = typer.Option(None, "--target", help="Target branch/SHA (default repo default)"),
-    asset: list[str] = typer.Option(None, "--asset", help="Glob(s) of assets to upload; repeatable", show_default=False),
-
+    asset: list[str] = typer.Option(
+        None, "--asset", help="Glob(s) of assets to upload; repeatable", show_default=False
+    ),
     # Auto mode
-    auto_from_uv: bool = typer.Option(False, "--auto-from-uv", help="Derive version via `uv version` per repo and release it"),
+    auto_from_uv: bool = typer.Option(
+        False, "--auto-from-uv", help="Derive version via `uv version` per repo and release it"
+    ),
     tag_prefix: str = typer.Option("", "--tag-prefix", help="Prefix for tag in auto mode ('' for none)"),
-
     # Batch/general
     dest: str | None = typer.Option(None, "--dest", help="Root folder of repos"),
     token: str | None = typer.Option(None, "--token", help="Override GH token if needed"),
@@ -34,8 +40,7 @@ def release(
     exclude: str | None = typer.Option(None, "--exclude", help="Comma-separated repo globs to exclude"),
     dry_run: bool = typer.Option(False, "--dry-run", help="Print gh command without executing"),
 ):
-    """
-    Batch-create releases across repos.
+    """Batch-create releases across repos.
 
     Examples:
       # Auto: read version from `uv version`, tag 'v<version>', title '<version>', generate notes, publish:
@@ -46,6 +51,7 @@ def release(
 
       # Fixed tag:
       ghca release --tag v0.3.0 --generate-notes --dest ../
+
     """
     s = get_settings()
 

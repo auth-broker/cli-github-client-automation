@@ -17,8 +17,7 @@ def _plan_repo_commands(
     clean_untracked: bool,
     clean_ignored: bool,
 ) -> list[list[str]]:
-    """Build the list of git commands to execute for this repo.
-    """
+    """Build the list of git commands to execute for this repo."""
     cmds: list[list[str]] = []
 
     if paths:

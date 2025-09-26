@@ -6,10 +6,9 @@ import os
 import shlex
 import subprocess
 from concurrent.futures import ThreadPoolExecutor, as_completed
-from typing import Iterable
 
-from ..core.utils import matches_any_glob
 from ..core.git_client import GitClient
+from ..core.utils import matches_any_glob
 
 
 def _list_target_dirs(dest: str, only_git: bool, recursive: bool) -> list[str]:
@@ -66,13 +65,11 @@ def _run_one(
     try:
         if use_shell:
             # Run via platform shell. Join a safe string for POSIX; on Windows, shell=True uses cmd.exe.
-            proc = subprocess.run(" ".join(cmd), cwd=cwd, shell=True, env=inherit_env,
-                                  capture_output=True, text=True)
+            proc = subprocess.run(" ".join(cmd), cwd=cwd, shell=True, env=inherit_env, capture_output=True, text=True)
         else:
-            proc = subprocess.run(cmd, cwd=cwd, shell=False, env=inherit_env,
-                                  capture_output=True, text=True)
+            proc = subprocess.run(cmd, cwd=cwd, shell=False, env=inherit_env, capture_output=True, text=True)
 
-        ok = (proc.returncode == 0)
+        ok = proc.returncode == 0
         out = proc.stdout.strip()
         err = proc.stderr.strip()
         msg = f"[ok] {name}" if ok else f"[fail] {name} (exit {proc.returncode})"
@@ -136,9 +133,7 @@ def batch_run_command(
                 break
     else:
         with ThreadPoolExecutor(max_workers=jobs) as pool:
-            futures = {
-                pool.submit(_run_one, d, cmd, shell, base_env, dry_run): d for d in filtered
-            }
+            futures = {pool.submit(_run_one, d, cmd, shell, base_env, dry_run): d for d in filtered}
             for fut in as_completed(futures):
                 name, ok, msg = fut.result()
                 print(msg)

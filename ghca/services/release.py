@@ -9,13 +9,11 @@ from ..core.git_client import GitClient
 from ..core.github_client import GitHubClient, GitHubError
 from ..core.utils import matches_any_glob, resolve_asset_globs
 
-
 _VERSION_RE = re.compile(r"(?P<version>\d+\.\d+\.\d+(?:[.-][0-9A-Za-z]+)*)")
 
 
 def _derive_version_with_uv(git: GitClient, repo_dir: str) -> str | None:
-    """
-    Run `uv version` in repo_dir and return the parsed version string.
+    """Run `uv version` in repo_dir and return the parsed version string.
     Expected output format examples:
       - 'my-project 0.1.1'
       - '0.2.0'
@@ -36,7 +34,7 @@ def _derive_version_with_uv(git: GitClient, repo_dir: str) -> str | None:
 def batch_create_releases(
     *,
     dest: str,
-    tag: str | None,                     # may be None in auto mode
+    tag: str | None,  # may be None in auto mode
     title: str | None,
     notes_file: str | None,
     generate_notes: bool,
@@ -49,8 +47,8 @@ def batch_create_releases(
     only_globs: list[str],
     exclude_globs: list[str],
     dry_run: bool,
-    auto_from_uv: bool,                  # NEW: per-repo version discovery
-    tag_prefix: str,                     # NEW: prefix for tag (default "v")
+    auto_from_uv: bool,  # NEW: per-repo version discovery
+    tag_prefix: str,  # NEW: prefix for tag (default "v")
 ) -> None:
     git = GitClient()
     gh = GitHubClient(token=token)
