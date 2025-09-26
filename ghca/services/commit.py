@@ -1,6 +1,8 @@
 """Services for batch commit and push operations."""
 
-from ...core.gitops import commit_and_push_one, find_git_worktrees
+from __future__ import annotations
+
+from ..core.git_client import GitClient
 
 
 def batch_commit_and_push(
@@ -13,7 +15,9 @@ def batch_commit_and_push(
     push_no_verify: bool,
 ) -> None:
     """Commit and push changes across repositories under dest."""
-    repos = find_git_worktrees(dest)
+    git = GitClient()
+
+    repos = git.find_worktrees(dest)
     if not repos:
         print("No repositories found to commit/push.")
         return
@@ -22,7 +26,7 @@ def batch_commit_and_push(
     committed = pushed = skipped = failed = 0
 
     for d in repos:
-        ok, msg = commit_and_push_one(
+        ok, msg = git.commit_and_push_one(
             repo_dir=d,
             message=message,
             branch=branch,

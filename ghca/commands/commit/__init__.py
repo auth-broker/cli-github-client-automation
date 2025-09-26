@@ -1,1 +1,0 @@
-"""Commit subcommand package."""

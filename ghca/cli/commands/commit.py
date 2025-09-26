@@ -1,9 +1,11 @@
 """CLI for batch committing and pushing changes across repositories."""
 
+from __future__ import annotations
+
 import typer
 
 from ...config.settings import get_settings
-from .service import batch_commit_and_push
+from ...services.commit import batch_commit_and_push
 
 app = typer.Typer(add_completion=False)
 

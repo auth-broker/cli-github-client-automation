@@ -13,7 +13,7 @@ dev = [
 
 [project]
 name = "github-client-automation"
-version = "0.1.0"
+version = "0.1.1"
 description = "Clone/update/commit/push across an org's GitHub repos"
 readme = "README.md"
 requires-python = ">=3.13"
@@ -25,7 +25,7 @@ dependencies = [
 ]
 
 [project.scripts]
-ghca = "ghca.cli:app"
+ghca = "ghca.cli.main:app"
 
 [tool.hatch.build.targets.sdist]
 include = ["ghca"]

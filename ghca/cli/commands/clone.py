@@ -1,10 +1,12 @@
 """CLI for cloning repositories from an organisation."""
 
+from __future__ import annotations
+
 import typer
 
 from ...config.settings import get_settings
 from ...core.types import Visibility
-from .service import clone_org
+from ...services.clone import clone_org
 
 app = typer.Typer(add_completion=False)
 
