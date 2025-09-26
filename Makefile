@@ -4,7 +4,7 @@
 #   make update DEST=repos
 
 UV ?= uv
-SCRIPT ?= clone_org_repos.py
+SCRIPT ?= main.py
 ORG ?= auth-broker
 DEST ?= ../
 FLAGS ?=
@@ -12,6 +12,10 @@ FLAGS ?=
 # Ensure deps are installed (uses pyproject.toml)
 sync:
 	$(UV) sync
+
+# Quick check that the token is visible to the runtime
+env-check: sync
+	$(UV) run python -c "from dotenv import load_dotenv; load_dotenv(); import os; print('GITHUB_TOKEN set:' , bool(os.getenv('GITHUB_TOKEN')))"
 
 # Clone all org repos (uses the managed venv)
 clone: sync
@@ -21,6 +25,5 @@ clone: sync
 update: sync
 	$(UV) run $(SCRIPT) --update --dest $(DEST)
 
-# Quick check that the token is visible to the runtime
-env-check: sync
-	$(UV) run python -c "from dotenv import load_dotenv; load_dotenv(); import os; print('GITHUB_TOKEN set:' , bool(os.getenv('GITHUB_TOKEN')))"
+commit: sync
+	$(UV) run $(SCRIPT) --dest $(DEST) commit -m "$(MSG)" $(if $(BRANCH),--branch $(BRANCH),)
