@@ -1,26 +1,29 @@
 import os
-from typing import Optional
 
 import typer
 from dotenv import load_dotenv
 
-from .types import Visibility
 from .api import list_org_repos
 from .gitops import (
-    clone_repo, pull_update, batch_commit_and_push,
+    batch_commit_and_push,
+    clone_repo,
+    pull_update,
 )
+from .types import Visibility
 
 app = typer.Typer(add_completion=False, help="Clone/update/commit/push across an org's GitHub repos.")
 load_dotenv()  # allow .env GITHUB_TOKEN etc.
 
+
 def _default_token():
     return os.getenv("GITHUB_TOKEN")
+
 
 @app.command()
 def clone(
     org: str = typer.Option(..., help="GitHub organisation login (e.g. 'pallets')"),
     dest: str = typer.Option("repos", help="Destination directory"),
-    token: Optional[str] = typer.Option(_default_token(), help="GitHub PAT"),
+    token: str | None = typer.Option(_default_token(), help="GitHub PAT"),
     ssh: bool = typer.Option(False, "--ssh", help="Use SSH URLs"),
     mirror: bool = typer.Option(False, "--mirror", help="Use --mirror clones"),
     shallow: bool = typer.Option(False, "--shallow", help="Shallow clones (depth 1)"),
@@ -42,11 +45,12 @@ def clone(
         ok, msg = clone_repo(r, dest, use_ssh=ssh, mirror=mirror, shallow=shallow, token=token)
         name = r["full_name"]
         if ok:
-            typer.echo(f"[ok] {name} {('('+msg+')') if msg else ''}")
+            typer.echo(f"[ok] {name} {('(' + msg + ')') if msg else ''}")
             successes += 1
         else:
             typer.secho(f"[fail] {name}: {msg}", err=True)
     typer.echo(f"Done. {successes}/{len(repos)} succeeded.")
+
 
 @app.command()
 def update(
@@ -57,12 +61,13 @@ def update(
     ok, total = pull_update(dest, mirror=mirror)
     typer.echo(f"Updated {ok}/{total} existing clones.")
 
+
 @app.command()
 def commit(
     message: str = typer.Argument(..., help="Commit message"),
     dest: str = typer.Option("repos", help="Destination directory"),
-    token: Optional[str] = typer.Option(_default_token(), help="GitHub PAT"),
-    branch: Optional[str] = typer.Option(None, help="Branch to push to (default: current)"),
+    token: str | None = typer.Option(_default_token(), help="GitHub PAT"),
+    branch: str | None = typer.Option(None, help="Branch to push to (default: current)"),
     allow_empty: bool = typer.Option(False, "--allow-empty", help="Allow empty commits"),
     sign: bool = typer.Option(False, "--sign", help="GPG-sign commits if configured"),
     no_verify: bool = typer.Option(False, "--no-verify", help="Skip push hooks"),

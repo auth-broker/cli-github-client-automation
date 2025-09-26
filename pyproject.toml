@@ -2,6 +2,15 @@
 build-backend = "hatchling.build"
 requires = ["hatchling"]
 
+[dependency-groups]
+dev = [
+  "debugpy>=1.8.14,<2",
+  "isort>=6.0.1,<7",
+  "pre-commit>=4.2.0,<5",
+  "ruff>=0.12.3,<0.13",
+  "tox>=4.27.0,<5"
+]
+
 [project]
 name = "github-client-automation"
 version = "0.1.0"

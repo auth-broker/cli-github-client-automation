@@ -1,22 +1,27 @@
-import os, subprocess, sys
-from typing import List, Optional, Tuple
+import os
+import subprocess
+import sys
+
 from .api import inject_token_into_https
 
-def run(cmd: List[str], cwd: Optional[str] = None) -> Tuple[bool, Optional[str]]:
+
+def run(cmd: list[str], cwd: str | None = None) -> tuple[bool, str | None]:
     try:
         subprocess.check_call(cmd, cwd=cwd)
         return True, None
     except subprocess.CalledProcessError as e:
         return False, f"{e}"
 
-def run_out(cmd: List[str], cwd: Optional[str] = None) -> Tuple[bool, str]:
+
+def run_out(cmd: list[str], cwd: str | None = None) -> tuple[bool, str]:
     try:
         out = subprocess.check_output(cmd, cwd=cwd, stderr=subprocess.STDOUT)
         return True, out.decode("utf-8").strip()
     except subprocess.CalledProcessError as e:
         return False, e.output.decode("utf-8", "ignore").strip()
 
-def clone_repo(repo: dict, dest: str, use_ssh=False, mirror=False, shallow=False, token: Optional[str]=None):
+
+def clone_repo(repo: dict, dest: str, use_ssh=False, mirror=False, shallow=False, token: str | None = None):
     name = repo["name"]
     url = repo["ssh_url"] if use_ssh else repo["clone_url"]
     if (not use_ssh) and token:
@@ -34,7 +39,8 @@ def clone_repo(repo: dict, dest: str, use_ssh=False, mirror=False, shallow=False
     cmd += [url, target]
     return run(cmd)
 
-def find_git_worktrees(dest: str) -> List[str]:
+
+def find_git_worktrees(dest: str) -> list[str]:
     worktrees = set()
     for root, dirs, _ in os.walk(dest):
         if ".git" in dirs:
@@ -42,8 +48,9 @@ def find_git_worktrees(dest: str) -> List[str]:
             dirs[:] = []
     return sorted(d for d in worktrees if not d.endswith(".git"))
 
+
 def pull_update(dest: str, mirror=False):
-    git_dirs: List[str] = []
+    git_dirs: list[str] = []
     if mirror:
         for root, dirs, files in os.walk(dest):
             if root.endswith(".git") and os.path.isfile(os.path.join(root, "config")):
@@ -60,25 +67,29 @@ def pull_update(dest: str, mirror=False):
             print(f"[update fail] {d}: {err}", file=sys.stderr)
     return ok, len(git_dirs)
 
+
 def git_status_has_changes(repo_dir: str) -> bool:
     success, out = run_out(["git", "status", "--porcelain"], cwd=repo_dir)
     return bool(success and out.strip())
 
-def get_current_branch(repo_dir: str) -> Optional[str]:
+
+def get_current_branch(repo_dir: str) -> str | None:
     ok, out = run_out(["git", "rev-parse", "--abbrev-ref", "HEAD"], cwd=repo_dir)
     return out.strip() if ok else None
 
-def get_origin_url(repo_dir: str) -> Optional[str]:
+
+def get_origin_url(repo_dir: str) -> str | None:
     ok, out = run_out(["git", "remote", "get-url", "origin"], cwd=repo_dir)
     return out.strip() if ok else None
+
 
 def batch_commit_and_push(
     dest: str,
     message: str,
-    branch: Optional[str] = None,
+    branch: str | None = None,
     allow_empty: bool = False,
     sign: bool = False,
-    token: Optional[str] = None,
+    token: str | None = None,
     push_no_verify: bool = False,
 ):
     repos = find_git_worktrees(dest)
@@ -97,30 +108,42 @@ def batch_commit_and_push(
 
         ok, err = run(["git", "add", "-A"], cwd=d)
         if not ok:
-            print(f"[fail] {name}: git add failed: {err}", file=sys.stderr); failed += 1; continue
+            print(f"[fail] {name}: git add failed: {err}", file=sys.stderr)
+            failed += 1
+            continue
 
         if not git_status_has_changes(d) and not allow_empty:
-            print(f"[clean] {name}: no changes"); skipped_clean += 1; continue
+            print(f"[clean] {name}: no changes")
+            skipped_clean += 1
+            continue
 
         commit_cmd = ["git", "commit", "-m", message]
-        if allow_empty: commit_cmd.append("--allow-empty")
-        if sign:        commit_cmd.append("-S")
+        if allow_empty:
+            commit_cmd.append("--allow-empty")
+        if sign:
+            commit_cmd.append("-S")
         ok, err = run(commit_cmd, cwd=d)
         if not ok:
             if err and "nothing to commit" in err.lower():
-                print(f"[clean] {name}: nothing to commit"); skipped_clean += 1; continue
-            print(f"[fail] {name}: git commit failed: {err}", file=sys.stderr); failed += 1; continue
+                print(f"[clean] {name}: nothing to commit")
+                skipped_clean += 1
+                continue
+            print(f"[fail] {name}: git commit failed: {err}", file=sys.stderr)
+            failed += 1
+            continue
         committed += 1
 
         target_branch = branch or get_current_branch(d) or "main"
         origin_url = get_origin_url(d)
 
         push_cmd = ["git", "push"]
-        if push_no_verify: push_cmd.append("--no-verify")
+        if push_no_verify:
+            push_cmd.append("--no-verify")
 
         push_url = None
         if origin_url and origin_url.startswith("https://") and token:
             from urllib.parse import urlparse
+
             if "@" not in urlparse(origin_url).netloc:
                 push_url = inject_token_into_https(origin_url, token)
 
@@ -131,8 +154,10 @@ def batch_commit_and_push(
 
         ok, err = run(push_cmd, cwd=d)
         if ok:
-            print(f"[pushed] {name} -> {target_branch}"); pushed += 1
+            print(f"[pushed] {name} -> {target_branch}")
+            pushed += 1
         else:
-            print(f"[fail] {name}: git push failed: {err}", file=sys.stderr); failed += 1
+            print(f"[fail] {name}: git push failed: {err}", file=sys.stderr)
+            failed += 1
 
     print(f"Done. committed={committed}, pushed={pushed}, clean={skipped_clean}, failed={failed}.")
