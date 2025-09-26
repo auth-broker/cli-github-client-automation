@@ -8,7 +8,7 @@ import subprocess
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from typing import Iterable
 
-from ..core.batch import matches_any_glob
+from ..core.utils import matches_any_glob
 from ..core.git_client import GitClient
 
 

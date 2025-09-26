@@ -22,8 +22,7 @@ def discard(
     all: bool = typer.Option(False, "--all", help="Do not skip clean repos (default skips clean)"),
     dry_run: bool = typer.Option(False, "--dry-run", help="Print actions without executing"),
 ):
-    """
-    Discard local changes across repositories.
+    """Discard local changes across repositories.
 
     Examples:
       ghca discard --only 'service-*'                 # hard reset repos matching 'service-*'
@@ -31,6 +30,7 @@ def discard(
       ghca discard --clean --clean-ignored            # also remove untracked & ignored files
       ghca discard --mode mixed                       # reset --mixed (keeps worktree changes)
       ghca discard --dry-run                          # preview actions
+
     """
     s = get_settings()
     discard_changes_batch(

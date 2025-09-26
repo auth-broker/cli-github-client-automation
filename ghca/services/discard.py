@@ -1,11 +1,11 @@
 """Services for discarding local changes across repositories."""
+
 from __future__ import annotations
 
 import os
-from typing import Iterable
 
-from ..core.batch import matches_any_glob
 from ..core.git_client import GitClient
+from ..core.utils import matches_any_glob
 
 
 def _plan_repo_commands(
@@ -17,8 +17,7 @@ def _plan_repo_commands(
     clean_untracked: bool,
     clean_ignored: bool,
 ) -> list[list[str]]:
-    """
-    Build the list of git commands to execute for this repo.
+    """Build the list of git commands to execute for this repo.
     """
     cmds: list[list[str]] = []
 
@@ -44,12 +43,12 @@ def discard_changes_batch(
     *,
     dest: str,
     paths: list[str],
-    mode: str,                 # "hard" | "mixed" | "soft"
-    clean: bool,               # remove untracked files/dirs
-    clean_ignored: bool,       # also remove ignored
+    mode: str,  # "hard" | "mixed" | "soft"
+    clean: bool,  # remove untracked files/dirs
+    clean_ignored: bool,  # also remove ignored
     only_globs: list[str],
     exclude_globs: list[str],
-    only_dirty: bool,          # skip repos with no changes
+    only_dirty: bool,  # skip repos with no changes
     dry_run: bool,
 ) -> None:
     git = GitClient()

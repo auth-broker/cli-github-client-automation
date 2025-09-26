@@ -2,11 +2,11 @@
 
 import typer
 
+from .commands.batch import app as batch_app
 from .commands.clone import app as clone_app
 from .commands.commit import app as commit_app
-from .commands.release import app as release_app
-from .commands.batch import app as batch_app
 from .commands.discard import app as discard_app
+from .commands.release import app as release_app
 
 app = typer.Typer(add_completion=False, help="Clone/update/commit/push across an org's GitHub repos.")
 

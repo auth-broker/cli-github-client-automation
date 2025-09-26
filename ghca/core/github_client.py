@@ -1,4 +1,5 @@
 """GitHub API operations + gh-based release creation."""
+
 from __future__ import annotations
 
 import json
@@ -6,7 +7,8 @@ import os
 import shutil
 import subprocess
 import urllib.request
-from typing import Any, Iterable, Sequence, Tuple
+from collections.abc import Sequence
+from typing import Any
 from urllib.parse import urlparse, urlunparse
 
 from .constants import API_BASE, GITHUB_API_ACCEPT, HTTP_TIMEOUT_SEC, USER_AGENT
@@ -65,14 +67,12 @@ class GitHubClient:
     @staticmethod
     def _ensure_gh_available() -> None:
         if not shutil.which("gh"):
-            raise GitHubError(
-                "GitHub CLI 'gh' not found. Install https://cli.github.com/ and run 'gh auth login'."
-            )
+            raise GitHubError("GitHub CLI 'gh' not found. Install https://cli.github.com/ and run 'gh auth login'.")
 
     def create_release_with_gh(
         self,
         *,
-        repo_full: str,                 # "owner/name"
+        repo_full: str,  # "owner/name"
         tag: str,
         title: str | None = None,
         notes_file: str | None = None,
@@ -83,7 +83,7 @@ class GitHubClient:
         asset_paths: Sequence[str] = (),
         cwd: str | None = None,
         dry_run: bool = False,
-    ) -> Tuple[bool, str]:
+    ) -> tuple[bool, str]:
         """Create a GitHub release via the gh CLI. Returns (ok, message)."""
         self._ensure_gh_available()
 

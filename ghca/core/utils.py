@@ -1,10 +1,11 @@
 """Lightweight helpers for batch orchestration (globs, assets)."""
+
 from __future__ import annotations
 
 import fnmatch
 import glob
 import os
-from typing import Sequence
+from collections.abc import Sequence
 
 
 def matches_any_glob(name: str, patterns: Sequence[str]) -> bool:

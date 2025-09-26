@@ -6,8 +6,8 @@ import os
 import sys
 import time
 
-from ..core.github_client import GitHubClient
 from ..core.git_client import GitClient
+from ..core.github_client import GitHubClient
 
 
 def clone_org(

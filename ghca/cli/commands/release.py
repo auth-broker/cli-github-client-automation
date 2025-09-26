@@ -19,7 +19,9 @@ def release(
     draft: bool = typer.Option(False, "--draft", help="Create as draft"),
     prerelease: bool = typer.Option(False, "--prerelease", help="Mark as prerelease"),
     target: str | None = typer.Option(None, "--target", help="Target branch/SHA (default repo default)"),
-    asset: list[str] = typer.Option(None, "--asset", help="Glob(s) of assets to upload; repeatable", show_default=False),
+    asset: list[str] = typer.Option(
+        None, "--asset", help="Glob(s) of assets to upload; repeatable", show_default=False
+    ),
     dest: str | None = typer.Option(None, "--dest", help="Root folder of repos"),
     token: str | None = typer.Option(None, "--token", help="Override GH token if needed"),
     since_last_tag_only: bool = typer.Option(False, "--since-last-tag-only", help="Skip if no commits since last tag"),
