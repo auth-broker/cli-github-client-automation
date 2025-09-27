@@ -21,13 +21,6 @@
             "command": "make lint",
             "group": "build",
             "detail": "run the linter on bare metal"
-        },
-        {
-            "label": "help",
-            "type": "shell",
-            "command": "make help",
-            "group": "build",
-            "detail": "Show make targets help"
         }
     ]
 }
