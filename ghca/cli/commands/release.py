@@ -32,6 +32,7 @@ def release(
         False, "--auto-from-uv", help="Derive version via `uv version` per repo and release it"
     ),
     tag_prefix: str = typer.Option("", "--tag-prefix", help="Prefix for tag in auto mode ('' for none)"),
+    tag_suffix: str = typer.Option("", "--tag-suffix", help="Suffix for tag in auto mode ('' for none)"),
     # Batch/general
     dest: str | None = typer.Option(None, "--dest", help="Root folder of repos"),
     token: str | None = typer.Option(None, "--token", help="Override GH token if needed"),
@@ -76,4 +77,5 @@ def release(
         dry_run=dry_run,
         auto_from_uv=auto_from_uv,
         tag_prefix=tag_prefix,
+        tag_suffix=tag_suffix,
     )

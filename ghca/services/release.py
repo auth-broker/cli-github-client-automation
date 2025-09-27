@@ -48,7 +48,8 @@ def batch_create_releases(
     exclude_globs: list[str],
     dry_run: bool,
     auto_from_uv: bool,  # NEW: per-repo version discovery
-    tag_prefix: str,  # NEW: prefix for tag (default "v")
+    tag_prefix: str,  # NEW: prefix for tag (default "")
+    tag_suffix: str,  # NEW: prefix for tag (default "")
 ) -> None:
     git = GitClient()
     gh = GitHubClient(token=token)
@@ -106,7 +107,7 @@ def batch_create_releases(
                 print(f"[skip] {name}: could not derive version via `uv version`")
                 skipped += 1
                 continue
-            eff_tag = f"{tag_prefix}{version}" if tag_prefix else version
+            eff_tag = f"{tag_prefix}{version}{tag_suffix}"
             # title = version unless provided explicitly
             eff_title = eff_title or version
             # force auto notes / publish in auto mode unless user overrode
